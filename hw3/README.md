@@ -1,4 +1,4 @@
-# CS3113 - Homework 2
+# CS3113 - Homework 3
 Description of the assignment was:
 * Make Space Invaders
 * It must have 2 game modes: TITLE SCREEN and GAME LEVEL and use a game state
