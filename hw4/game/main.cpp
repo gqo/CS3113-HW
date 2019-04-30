@@ -19,6 +19,7 @@
 #endif
 
 #include <vector>
+#include <unistd.h>
 
 #define MAX_BULLETS 16
 #define MAX_ENEMIES 12
@@ -38,7 +39,7 @@
 
 #define NUM_SOLIDS 1
 
-#define TINY_VALUE 1.0f/4096.0f
+#define TINY_VALUE 0.03125f
 
 // Generic print function for debugging found at: https://stackoverflow.com/a/22483243
 template <typename T>
@@ -66,19 +67,19 @@ void print_container(const T& c) {
 
 unsigned int levelOne[LEVEL_HEIGHT][LEVEL_WIDTH] =
 {
-    {2,2,2,2,0, 0,0,0,0,0, 0,0,0,0,0, 0,2,2,2,2, 2,2,2,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,2,2,2,2},
+    {2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2},
     {2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
     {2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
-    {2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
+    {2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2, 2,2,2,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
 
-    {0,0,0,0,0, 0,0,0,0,0, 2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0},
-    {0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0},
-    {0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0},
-    {0,0,0,0,0, 0,0,0,0,0, 3,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0},
+    {2,0,0,0,0, 0,0,0,2,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,2,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
+    {2,0,0,0,0, 0,0,0,2,0, 0,0,2,0,0, 0,0,0,0,0, 0,0,2,0,0, 0,0,0,0,0, 0,0,0,0,2, 0,0,0,0,2},
+    {2,0,0,2,0, 0,0,0,2,2, 2,2,2,0,0, 0,0,0,0,0, 0,0,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 0,0,0,0,2},
+    {2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,2,2},
 
+    {2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
     {2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
-    {2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
-    {2,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
+    {2,2,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,2},
     {2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2, 2,2,2,2,2}
 };
 
@@ -101,6 +102,8 @@ SDL_Event event;
 bool done = false;
 
 const Uint8 *keys;
+
+float gravity_y = -3.0f;
 
 enum EntityType { PLAYER, ENEMY };
 
@@ -220,6 +223,7 @@ class Entity {
         float width;
         float height;
 
+        glm::vec3 last_position = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -227,12 +231,22 @@ class Entity {
         int spriteIndex;
 
         bool collidedTop = false;
-        bool collidedBotoom = false;
+        bool collidedBottom = false;
         bool collidedLeft = false;
         bool collidedRight = false;
 
+        EntityType entity_type;
+
+        void Accelerate(float elapsed);
         void MoveX(float elapsed);
         void MoveY(float elapsed);
+        void Draw() {
+            glm::mat4 modelMatrix = glm::mat4(1.0f);
+            modelMatrix = glm::translate(modelMatrix, glm::vec3(position.x, position.y, position.z));
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(TILE_SIZE,TILE_SIZE,0.0f));
+            program.SetModelMatrix(modelMatrix);
+            DrawSpriteSheetSprite(program, spriteIndex);
+        }
 };
 
 class Player {
@@ -241,6 +255,8 @@ class Player {
         int headIndex;
         Entity body;
         int legIndex;
+
+        bool airJumped = false;
 
         void Draw();
 };
@@ -354,22 +370,196 @@ float pen(float p0, float p1, float measurement1, float measurement2) {
     return fabs(distance - (measurement1 * 0.5f) - (measurement2 * 0.5f));
 }
 
-void Entity::MoveX(float elapsed) {
+void Entity::Accelerate(float elapsed) {
     this->velocity.x = lerp(velocity.x, 0.0f, elapsed * 2.0f);
     if (abs(velocity.x) < 0.016f) {
         this->velocity.x = 0.0f;
     }
     this->velocity.x += acceleration.x * elapsed;
-    this->position.x += velocity.x * elapsed;
-}
 
-void Entity::MoveY(float elapsed) {
     this->velocity.y = lerp(velocity.y, 0.0f, elapsed * 2.0f);
     if (abs(velocity.y) < 0.016f) {
         this->velocity.y = 0.0f;
     }
     this->velocity.y += acceleration.y * elapsed;
+    if (!(collidedBottom)) {
+        this->velocity.y += gravity_y * elapsed;
+    }
+}
+
+void getTileCoords(float worldX, float worldY, int &gridX, int &gridY) {
+    // print("Grid tile X and Y:");
+    gridX = (int)worldX;
+    gridY = (int)worldY;
+    // print(gridX);
+    // print(gridY);
+}
+
+void getAdjustedWorldCoords(float x, float y, float &worldX, float &worldY) {
+    // print("Tile Size:");
+    // print(TILE_SIZE);
+    // print("World X and Y:");
+    // print(x);
+    // print(y);
+    worldX = (x - (WORLD_SHIFT_X)) / (TILE_SIZE);
+    worldY = (y - (WORLD_SHIFT_Y)) / (-TILE_SIZE);
+    // print("Float tile X and Y:");
+    // print(worldX);
+    // print(worldY);
+}
+
+bool checkSolid(const int x, const int y) {
+    int blockType = levelOne[y][x];
+    // print("Block Type:");
+    // print(blockType);
+
+    for (int i = 0; i < NUM_SOLIDS; i++) {
+        if(blockType == solids[i]) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool CheckLeftWorldCollide(const Entity right) {
+    int gridX, gridY;
+    float worldX, worldY;
+
+    getAdjustedWorldCoords(right.position.x - (0.5f * right.width), right.position.y - (0.5f * right.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    getAdjustedWorldCoords(right.position.x - (0.5f * right.width), right.position.y - (0.25f * right.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    getAdjustedWorldCoords(right.position.x - (0.5f * right.width), right.position.y, worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool CheckRightWorldCollide(const Entity left) {
+    int gridX, gridY;
+    float worldX, worldY;
+
+    getAdjustedWorldCoords(left.position.x + (0.5f * left.width), left.position.y - (0.5f * left.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    getAdjustedWorldCoords(left.position.x + (0.5f * left.width), left.position.y - (0.25f * left.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    getAdjustedWorldCoords(left.position.x + (0.5f * left.width), left.position.y, worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool CheckTopWorldCollide(const Entity bottom) {
+    int gridX, gridY;
+    float worldX, worldY;
+
+    getAdjustedWorldCoords(bottom.position.x + (0.5 * bottom.width), bottom.position.y + (0.25f * bottom.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    getAdjustedWorldCoords(bottom.position.x, bottom.position.y + (0.25f * bottom.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    getAdjustedWorldCoords(bottom.position.x - (0.5 * bottom.width), bottom.position.y + (0.25f * bottom.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool CheckBottomWorldCollide(const Entity top) {
+    int gridX, gridY;
+    float worldX, worldY;
+    
+    getAdjustedWorldCoords(top.position.x + (0.5 * top.width), top.position.y - (0.5f * top.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    getAdjustedWorldCoords(top.position.x, top.position.y - (0.5f * top.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    getAdjustedWorldCoords(top.position.x - (0.5 * top.width), top.position.y - (0.5f * top.height), worldX, worldY);
+    getTileCoords(worldX, worldY, gridX, gridY);
+
+    if (checkSolid(gridX, gridY)) {
+        return true;
+    }
+
+    return false;
+}
+
+void Entity::MoveX(float elapsed) {
+    this->position.x += velocity.x * elapsed;
+
+    if(CheckLeftWorldCollide(*this)) {
+        this->position.x = last_position.x;
+        this->velocity.x = 0.0f;
+        this->collidedLeft = true;
+    } else if (CheckRightWorldCollide(*this)) {
+        this->position.x = last_position.x;
+        this->velocity.x = 0.0f;
+        this->collidedRight = true;
+    }
+}
+
+void Entity::MoveY(float elapsed) {
     this->position.y += velocity.y * elapsed;
+
+    if(CheckBottomWorldCollide(*this)) {
+        this->position.y = last_position.y;
+        this->velocity.y = 0.0f;
+        this->collidedBottom = true;
+    } else if (CheckTopWorldCollide(*this)) {
+        this->position.y = last_position.y;
+        this->velocity.y = 0.0f;
+        this->collidedTop = true;
+    }
 }
 
 void DrawLevel(ShaderProgram &p) {
@@ -425,10 +615,9 @@ void DrawLevel(ShaderProgram &p) {
 class GameState {
     public:
         Player player;
-        Entity enemies[12];
-        Entity bullets[16];
-
-        int bulletIndex = 0;
+        Entity enemies[5];
+        Entity enemy1;
+        Entity enemy2;
 
         void Setup();
         void Render();
@@ -438,68 +627,46 @@ class GameState {
 
 GameState gameState;
 
-// SpriteData playerSprite = SpriteData(237.0f/1024.0f, 377.0f/1024.0f, 99.0f/1024.0f, 75.0f/1024.0f);
-// SpriteData bulletSprite = SpriteData(143.0f/1024.0f, 377.0f/1024.0f, 43.0f/1024.0f, 31.0f/1024.0f);
-// SpriteData enemySprite1 = SpriteData(423.0f/1024.0f, 728.0f/1024.0f, 93.0f/1024.0f, 84.0f/1024.0f);
-// SpriteData enemySprite2 = SpriteData(425.0f/1024.0f, 468.0f/1024.0f, 93.0f/1024.0f, 84.0f/1024.0f);
-// SpriteData enemySprite3 = SpriteData(144.0f/1024.0f, 156.0f/1024.0f, 103.0f/1024.0f, 84.0f/1024.0f);
-// SpriteData enemySprite4 = SpriteData(224.0f/1024.0f, 496.0f/1024.0f, 103.0f/1024.0f, 84.0f/1024.0f);
-// SpriteData enemySprite5 = SpriteData(346.0f/1024.0f, 150.0f/1024.0f, 97.0f/1024.0f, 84.0f/1024.0f);
-// SpriteData enemySprite6 = SpriteData(423.0f/1024.0f, 644.0f/1024.0f, 97.0f/1024.0f, 84.0f/1024.0f);
-// SpriteData borderSprite = SpriteData(0.0f, 0.0f, 256.0f, 256.0f);
-
 void GameState::Setup() {
     // Setup game state entities
     // Player
-    this->player.body.position.x = 0.0f;
-    this->player.body.position.y = 0.0f - (TILE_SIZE * 1);
+    this->player.body.position.x = 0.0f - (TILE_SIZE * 9);
+    this->player.body.position.y = 0.0f - (TILE_SIZE * 2.5);
+    this->player.body.last_position = player.body.position;
     this->player.body.width = TILE_SIZE;
     this->player.body.height = 2.0f * TILE_SIZE;
-    this->player.body.spriteIndex = 98;
 
+    this->player.body.spriteIndex = 98;
     this->player.headIndex = 82;
     this->player.legIndex = 66;
-    // this->player.sprite = SheetSprite(spaceSprite, playerSprite, unit);
-
-    // // Bullets
-    // for(int i = 0; i < MAX_BULLETS; i++) {
-    //     this->bullets[i].sprite = SheetSprite(arneSprites, bulletSprite, unit/4);
-    //     this->bullets[i].x = 1000;
-    //     this->bullets[i].width = unit/4;
-    //     this->bullets[i].height = unit/4;
-    //     this->bullets[i].direction_y = 1.0f;
-    // }
 
     // Enemies
-    // for(int i = 0; i < 6; i++) {
-    //     for(int j = 0; j < 6; j++) {
-    //         switch(i) {
-    //             case 0:
-    //                 this->enemies[(i*6)+j].sprite = SheetSprite(arneSprites, enemySprite1, unit);
-    //                 break;
-    //             case 1:
-    //                 this->enemies[(i*6)+j].sprite = SheetSprite(arneSprites, enemySprite2, unit);
-    //                 break;
-    //             case 2:
-    //                 this->enemies[(i*6)+j].sprite = SheetSprite(arneSprites, enemySprite3, unit);
-    //                 break;
-    //             case 3:
-    //                 this->enemies[(i*6)+j].sprite = SheetSprite(arneSprites, enemySprite4, unit);
-    //                 break;
-    //             case 4:
-    //                 this->enemies[(i*6)+j].sprite = SheetSprite(arneSprites, enemySprite5, unit);
-    //                 break;
-    //             case 5:
-    //                 this->enemies[(i*6)+j].sprite = SheetSprite(arneSprites, enemySprite6, unit);
-    //                 break;
-    //         }
-    //         this->enemies[(i*6)+j].x = start_x + (stride_x * j);
-    //         this->enemies[(i*6)+j].y = start_y + (stride_y * i);
-    //         this->enemies[(i*6)+j].width = unit;
-    //         this->enemies[(i*6)+j].height = unit;
-    //         this->enemies[(i*6)+j].direction_x = 1.0f;
-    //     }
-    // }
+    this->enemies[0].position.x = 0.0f + (TILE_SIZE * 2);
+    this->enemies[0].position.y = 0.0f - (TILE_SIZE * 2);
+    this->enemies[0].last_position = enemies[0].position;
+    this->enemies[0].width = TILE_SIZE;
+    this->enemies[0].height = TILE_SIZE;
+    this->enemies[0].spriteIndex = 80;
+    this->enemies[0].acceleration.x = -4.0f;
+
+    this->enemies[1] = enemies[0];
+    this->enemies[1].position.x = 0.0f + (TILE_SIZE * 14);
+    this->enemies[1].last_position = enemies[1].position;
+
+    this->enemies[2] = enemies[0];
+    this->enemies[2].position.y = 0.0f + (TILE_SIZE * 1);
+    this->enemies[2].position.x = 0.0f - (TILE_SIZE * 1);
+    this->enemies[2].last_position = enemies[2].position;
+
+    this->enemies[3] = enemies[0];
+    this->enemies[3].position.x = 0.0f + (TILE_SIZE * 19);
+    this->enemies[3].last_position = enemies[3].position;
+    this->enemies[3].acceleration.x = 4.0f;
+
+    this->enemies[4] = enemies[0];
+    this->enemies[4].position.y = 0.0f + (TILE_SIZE * 4);
+    this->enemies[4].position.x = 0.0f + (TILE_SIZE * 19);
+    this->enemies[4].last_position = enemies[4].position;
 }
 
 void GameState::Render() {
@@ -511,31 +678,12 @@ void GameState::Render() {
     // Draw game state entities
     // Player
     player.Draw();
-    // glm::mat4 modelMatrix = glm::mat4(1.0f);
-    // modelMatrix = glm::translate(modelMatrix, glm::vec3(player.x, player.y, player.z));
-    // modelMatrix = glm::scale(modelMatrix, glm::vec3(TILE_SIZE,TILE_SIZE,0.0f));
-    // program.SetModelMatrix(modelMatrix);
-    // DrawSpriteSheetSprite(program, player.spriteIndex);
 
-    // // Enemies
-    // for(int i = 0; i < 36; i++) {
-    //     glm::mat4 modelMatrix = glm::mat4(1.0f);
-    //     modelMatrix = glm::translate(modelMatrix, glm::vec3(enemies[i].x, enemies[i].y, enemies[i].z));
-    //     program.SetModelMatrix(modelMatrix);
-    //     enemies[i].sprite.Draw(program);
-    // }
+    // Enemies
+    for (int i=0; i < 5; i++) {
+        enemies[i].Draw();
+    }
 
-    // float angle = 90 * (PI / 180.0f);
-
-    // // Bullets
-    // for(int i = 0; i < MAX_BULLETS; i++) {
-    //     glm::mat4 modelMatrix = glm::mat4(1.0f);
-    //     modelMatrix = glm::translate(modelMatrix, glm::vec3(bullets[i].x, bullets[i].y, bullets[i].z));
-    //     modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(0.0f, 0.0f, 1.0f));
-    //     program.SetModelMatrix(modelMatrix);
-    //     bullets[i].sprite.Draw(program);
-    // }
-    
     // Draw the game level
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, glm::vec3(WORLD_SHIFT_X, WORLD_SHIFT_Y, 0.0f));
@@ -543,192 +691,59 @@ void GameState::Render() {
     DrawLevel(program);
 }
 
-void getTileCoords(float worldX, float worldY, int &gridX, int &gridY) {
-    // print("Grid tile X and Y:");
-    gridX = (int)worldX;
-    gridY = (int)worldY;
-    // print(gridX);
-    // print(gridY);
-}
+bool CheckEntityCollision(const Entity left, const Entity right) {
+    // Separate into two functions for x and y
+    float left_x = left.position.x + (left.width / 2);
+    float left_y = left.position.y - (left.height / 2);
 
-void getAdjustedWorldCoords(float x, float y, float &worldX, float &worldY) {
-    // print("Tile Size:");
-    // print(TILE_SIZE);
-    // print("World X and Y:");
-    // print(x);
-    // print(y);
-    worldX = (x - (WORLD_SHIFT_X)) / (TILE_SIZE);
-    worldY = (y - (WORLD_SHIFT_Y)) / (-TILE_SIZE);
-    // print("Float tile X and Y:");
-    // print(worldX);
-    // print(worldY);
-}
+    float right_x = right.position.x + (right.width / 2);
+    float right_y = right.position.y - (right.height / 2);
 
-bool checkSolid(const int x, const int y) {
-    int blockType = levelOne[y][x];
-    // print("Block Type:");
-    // print(blockType);
+    float p_x = glm::abs(left_x - right_x) - ((left.width + right.width) / 2);
+    float p_y = glm::abs(left_y - right_y) - ((left.height + right.height) / 2);
 
-    for (int i = 0; i < NUM_SOLIDS; i++) {
-        if(blockType == solids[i]) {
-            return true;
-        }
+    if ((p_x < 0.0f) && (p_y < 0.0f)) {
+        return true;
     }
 
     return false;
 }
 
-// bool CheckEntityCollision(const Entity left, const Entity right) {
-//     // Separate into two functions for x and y
-//     float left_x = left.x + (left.width / 2);
-//     float left_y = left.y - (left.height / 2);
-
-//     float right_x = right.x + (right.width / 2);
-//     float right_y = right.y - (right.height / 2);
-
-//     float p_x = glm::abs(left_x - right_x) - ((left.width + right.width) / 2);
-//     float p_y = glm::abs(left_y - right_y) - ((left.height + right.height) / 2);
-
-//     if ((p_x < 0.0f) && (p_y < 0.0f)) {
-//         return true;
-//     }
-
-//     return false;
-// }
-
-// bool CheckLeftWorldCollide(const Entity right) {
-    
-// }
-
-// bool CheckRightWorldCollide(const Entity left) {
-    
-// }
-
-bool CheckTopWorldCollide(const Entity top) {
-    int gridX, gridY;
-    float worldX, worldY;
-
-    getAdjustedWorldCoords(top.position.x, top.position.y + (0.5f * top.height), worldX, worldY);
-    getTileCoords(worldX, worldY, gridX, gridY);
-
-    // pen_y = gridY - worldY;
-    // print("Pen:");
-    // print(pen_y);
-
-    return checkSolid(gridX, gridY);
-}
-
-bool CheckBottomWorldCollide(const Entity top) {
-    int gridX, gridY;
-    float worldX, worldY;
-    
-    getAdjustedWorldCoords(top.position.x, top.position.y - (0.5f * top.height), worldX, worldY);
-    getTileCoords(worldX, worldY, gridX, gridY);
-
-    // pen_y = gridY - worldY;
-    // print("Pen:");
-    // print(pen_y);
-
-    return checkSolid(gridX, gridY);
-}
-
-// bool CheckEnemyCollision(const GameState *state, bool (*f)(const Entity)) {
-//     bool check = false;
-//     for(int i = 0; i < 36; i++) {
-//         if ((*f)(state->enemies[i])) {
-//             check = true;
-//             break;
-//         }
-//     }
-
-//     return check;
-// }
-
-// void CheckBulletCollision(GameState *state) {
-//     for(int i = 0; i < MAX_BULLETS; i++) {
-//         for(int j = 0; j < 36; j++) {
-//             if (CheckEntityCollision(state->bullets[i], state->enemies[j])) {
-
-//                 state->bullets[i].x = 1000;
-//                 state->enemies[j].y = 2000;
-//             }
-//         }
-//     }
-// }
-
 void GameState::Update(float elapsed) {
-    // if (!(CheckLeftCollide(player) || CheckRightCollide(player))) {
-    // print("test");
-    print("Velocity:");
-    print(player.body.velocity.y);
-    print("Accleration:");
-    print(player.body.acceleration.y);
-
     float pen_x, pen_y;
 
-    // if (!(CheckBottomWorldCollide(player.body, pen_y))) {
-    //     this->player.body.MoveY(elapsed);
-    // } else {
-    //     this->player.body.acceleration.y = 0.0f;
-    //     this->player.body.velocity.y = 0.0f;
-    //     this->player.body.position.y -= pen_y + (TINY_VALUE);
-    // }
+    this->player.body.collidedBottom = false;
+    this->player.body.collidedTop = false;
+    this->player.body.collidedLeft = false;
+    this->player.body.collidedRight = false;
 
-    // if (CheckTopWorldCollide(player.body)) {
-    //     this->player.body.MoveY(elapsed);
-    // }
+    this->player.body.Accelerate(elapsed);
+    this->player.body.last_position = player.body.position;
     this->player.body.MoveY(elapsed);
-    if (CheckBottomWorldCollide(player.body) || CheckTopWorldCollide(player.body)) {
-        float inverse = -1.0f;
-        float inverse_elapsed = inverse * elapsed;
-        this->player.body.MoveY(inverse);
-        // this->player.body.acceleration.y = 0.0f;
-        // this->player.body.velocity.y = 0.0f;
-    }
-
     this->player.body.MoveX(elapsed);
-    // }
 
-    // for(int i = 0; i < 36; i++) {
-    //     this->enemies[i].Move(elapsed);
-    // }
+    for (int i=0; i < 5; i++) {
+        this->enemies[i].Accelerate(elapsed);
+        this->enemies[i].last_position = enemies[i].position;
+        this->enemies[i].MoveY(elapsed);
+        this->enemies[i].MoveX(elapsed);
 
-    // if (CheckEnemyCollision(this, CheckLeftCollide)) {
-    //     for(int i = 0; i < 36; i++) {
-    //         this->enemies[i].direction_x = 1.0f;
-    //         this->enemies[i].y = enemies[i].y - unit;
-    //     }
-    // } else if (CheckEnemyCollision(this, CheckRightCollide)) {
-    //     for(int i = 0; i < 36; i++) {
-    //         this->enemies[i].direction_x = -1.0f;
-    //         this->enemies[i].y = enemies[i].y - unit;
-    //     }
-    // } else if (CheckEnemyCollision(this, CheckBottomCollide)) {
-    //     final_score = score;
-    //     score = 0;
-    //     overState.Setup();
-    //     gameMode = GAME_OVER;
-    // }
+        if(enemies[i].collidedLeft) {
+            this->enemies[i].collidedLeft = false;
+            this->enemies[i].acceleration.x = 4.0f;
+        } 
+        if(enemies[i].collidedRight) {
+            this->enemies[i].collidedRight = false;
+            this->enemies[i].acceleration.x = -4.0f;
+        }
 
-    // CheckBulletCollision(this);
-
-    // for(int i = 0; i < MAX_BULLETS; i++) {
-    //     this->bullets[i].Move(elapsed);
-    // }
-
+        if(CheckEntityCollision(enemies[i],player.body)) {
+            this->player.body.spriteIndex = 99;
+            this->player.body.position.x = 0.0f - (TILE_SIZE * 9);
+            this->player.body.position.y = 0.0f - (TILE_SIZE * 2.5);
+        }
+    }
 }
-
-// void Fire(GameState *state) {
-//     state->bullets[state->bulletIndex].x = state->player.body.x;
-//     state->bullets[state->bulletIndex].y = state->player.body.y;
-//     state->bullets[state->bulletIndex].velocity_y = 2.0f;
-
-//     state->bulletIndex++;
-
-//     if(state->bulletIndex > (MAX_BULLETS - 1)) {
-//         state->bulletIndex = 0;
-//     }
-// }
 
 void GameState::ProcessEvents() {
     if(keys[SDL_SCANCODE_LEFT]) {
@@ -755,7 +770,13 @@ void GameState::ProcessEvents() {
             if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                 done = true;
             } else if(event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-                this->player.body.velocity.y = 1.0f;
+                if (player.body.collidedBottom) {
+                    this->player.airJumped = false;
+                    this->player.body.velocity.y = 3.0f;
+                } else if (!(player.airJumped)) {
+                    this->player.airJumped = true;
+                    this->player.body.velocity.y = 2.0f;
+                }
             }
         }
     }
@@ -776,7 +797,7 @@ void Setup() {
     program.Load("vertex_textured.glsl", "fragment_textured.glsl");
 
     projectionMatrix = glm::mat4(1.0f);
-    viewMatrix = glm::mat4(1.0f);
+    viewMatrix = glm::mat4(1.0f); 
 
     projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
 
