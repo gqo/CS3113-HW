@@ -458,6 +458,7 @@ void shiftLevel(std::vector<unsigned int> x) {
 }
 
 int solids[NUM_SOLIDS] = {2,10,13,14,15,49};
+const int runAnimation[] = {66,67,68,69,70,71,64,65};
 
 const float PI = 3.14159265358979323846f;
 const float unit = 0.0625f;
@@ -635,13 +636,12 @@ class Player {
 
         int headIndex;
         Entity body;
-        int legIndex;
 
         bool airJumped = false;
         bool airDashed = false;
         bool movingLeft = false;
 
-        bool offscreen = false;
+        int legIndex = 0;
 
         int wins = 0;
 
@@ -681,7 +681,7 @@ void Player::Draw() {
     }
     modelMatrix = glm::scale(modelMatrix, glm::vec3(TILE_SIZE,TILE_SIZE,0.0f));
     program.SetModelMatrix(modelMatrix);
-    DrawSpriteSheetSprite(program, legIndex);
+    DrawSpriteSheetSprite(program, runAnimation[legIndex]);
 }
 
 void Player::Update(float elapsed) {
@@ -691,7 +691,6 @@ void Player::Update(float elapsed) {
     this->body.collidedRight = false;
     this->body.collidedGoal = false;
     this->body.collidedSpike = false;
-    this->offscreen = false;
 
     this->body.Accelerate(elapsed);
     this->body.last_position = body.position;
@@ -1378,7 +1377,8 @@ void GameState::Setup() {
 
         this->player1.body.spriteIndex = 98;
         this->player1.headIndex = 82;
-        this->player1.legIndex = 66;
+        // this->player1.legIndex = 66;
+        this->player1.legIndex = 0;
 
         // Player2
         this->player2 = player1;
@@ -1407,13 +1407,13 @@ void GameState::Render() {
     // Set scroll on player1 x movement (and z movement even though it doesn't matter)
     viewMatrix = glm::mat4(1.0f);
     
-    // if (lastHighest <= player1.body.position.y) {
+    if (lastHighest <= player1.body.position.y) {
         lastHighest = player1.body.position.y;
-    // } 
+    } 
     
-    // if(lastHighest <= player2.body.position.y) {
-    //     lastHighest = player2.body.position.y;
-    // }
+    if(lastHighest <= player2.body.position.y) {
+        lastHighest = player2.body.position.y;
+    }
 
     viewMatrix = glm::translate(viewMatrix, glm::vec3(towerX, -lastHighest,-player1.body.position.z));
     program.SetViewMatrix(viewMatrix);
@@ -1460,9 +1460,45 @@ bool CheckEntityCollision(const Entity left, const Entity right) {
 
 float last_bottom = -0.85f;
 
+const int numFrames = 8;
+float p1Elapsed = 0.0f;
+float p2Elapsed = 0.0f;
+float framesPerSecond = 30.0f;
+
 void GameState::Update(float elapsed) {
     player1.Update(elapsed);
     player2.Update(elapsed);
+
+    // animate legs!
+    if(player1.body.collidedBottom && (std::abs(player1.body.velocity.x) > TINY_VALUE)) {
+        p1Elapsed += elapsed;
+        if(p1Elapsed > 1.0/framesPerSecond) {
+            this->player1.legIndex++;
+            p1Elapsed = 0.0;
+
+            if(player1.legIndex > numFrames-1) {
+                this->player1.legIndex = 0;
+            }
+        }
+    } else {
+        p1Elapsed = 0.0f;
+        this->player1.legIndex = 0;
+    }
+
+    if(player2.body.collidedBottom && (std::abs(player2.body.velocity.x) > TINY_VALUE)) {
+        p2Elapsed += elapsed;
+        if(p2Elapsed > 1.0/framesPerSecond) {
+            this->player2.legIndex++;
+            p2Elapsed = 0.0;
+
+            if(player2.legIndex > numFrames-1) {
+                this->player2.legIndex = 0;
+            }
+        }
+    } else {
+        p2Elapsed = 0.0f;
+        this->player2.legIndex = 0;
+    }
 
     float distance = std::abs(player1.body.position.y - player2.body.position.y); // distance > 1.25 = loss
 
@@ -1470,14 +1506,14 @@ void GameState::Update(float elapsed) {
     bool player2win = false;
 
     // check if someone is off screen
-    // if (distance > 1.25f) {
-    //     if (player1.body.position.y > player2.body.position.y) {
-    //         player1win = true;
-    //     } else {
-    //         player2win = true;
-    //     }
-    //     Mix_PlayChannel(-1, offSound, 0);
-    // }
+    if (distance > 1.25f) {
+        if (player1.body.position.y > player2.body.position.y) {
+            player1win = true;
+        } else {
+            player2win = true;
+        }
+        Mix_PlayChannel(-1, offSound, 0);
+    }
 
     // check if someone collided with a spike
     if (player1.body.collidedSpike) {
@@ -1586,7 +1622,8 @@ void GameState::ProcessEvents() {
             done = true;
         } else if(event.type == SDL_KEYDOWN) {
             if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-                done = true;
+                menuState.Setup();
+                gameMode = MAIN_MENU;
             } else if(event.key.keysym.scancode == SDL_SCANCODE_RCTRL) {
                 ProcessJump(this->player1);
             } else if(event.key.keysym.scancode == SDL_SCANCODE_LCTRL) {
